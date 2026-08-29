@@ -158,6 +158,10 @@ impl DatastoreWorker {
         }
         conn.pragma_update(None, "synchronous", "FULL")
             .expect("Failed to set synchronous=FULL");
+        // busy_timeout lets a concurrent reader/writer wait briefly instead of
+        // failing immediately with SQLITE_BUSY under WAL load.
+        conn.busy_timeout(std::time::Duration::from_millis(5_000))
+            .expect("Failed to set busy_timeout");
 
         let mut ds = DatastoreInstance::new(&conn, true).unwrap();
 
